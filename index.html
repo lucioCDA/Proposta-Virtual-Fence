@@ -1,144 +1,587 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Proposta Comercial</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f4f4f4; }
-    input[type="number"] { width: 60px; }
-    .btn { background: #007bff; color: #fff; padding: 10px 15px; border: none; cursor: pointer; }
-    .btn:hover { background: #0056b3; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento Virtual Fence</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(0, 200, 255, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #b0b0b0;
+        }
+
+        .client-section {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .client-section label {
+            display: block;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .client-section input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .client-section input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .table-selector {
+            margin-bottom: 30px;
+        }
+
+        .table-selector label {
+            font-size: 1.2em;
+            color: #00d4ff;
+            margin-right: 15px;
+        }
+
+        .table-selector select {
+            padding: 12px 25px;
+            border-radius: 10px;
+            background: rgba(0, 212, 255, 0.2);
+            color: #fff;
+            border: 2px solid #00d4ff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .table-selector select:hover {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        .table-selector select option {
+            background: #16213e;
+            color: #fff;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 18px 12px;
+            text-align: left;
+            font-weight: bold;
+            color: #fff;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.9em;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+            background: rgba(22, 33, 62, 0.5);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(22, 33, 62, 0.7);
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            width: 70px;
+            text-align: center;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 153, 204, 0.2) 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #b0b0b0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-card p {
+            font-size: 1.8em;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .mensalidade-section {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .mensalidade-section h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+
+        .export-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .export-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                font-size: 0.8em;
+            }
+
+            input[type="number"] {
+                width: 50px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Proposta Comercial</h1>
+    <div class="container">
+        <div class="header">
+            <h1>Virtual Fence</h1>
+            <p>Sistema Inteligente de Segurança</p>
+        </div>
 
-  <label>Tabela de preços:</label>
-  <select id="tabela">
-    <option value="0.3">30%</option>
-    <option value="0.5">50%</option>
-    <option value="1.0" selected>100%</option>
-  </select>
+        <div class="client-section">
+            <label for="clientName">Nome do Cliente:</label>
+            <input type="text" id="clientName" placeholder="Digite o nome do cliente">
+        </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Preço Base</th>
-        <th>Quantidade</th>
-      </tr>
-    </thead>
-    <tbody id="lista-itens"></tbody>
-  </table>
+        <div class="table-selector">
+            <label for="priceTable">Selecione a Tabela de Preços:</label>
+            <select id="priceTable" onchange="atualizarPrecos()">
+                <option value="cost">Preço de Custo</option>
+                <option value="30">30% de Margem</option>
+                <option value="50">50% de Margem</option>
+                <option value="100">100% de Margem</option>
+            </select>
+        </div>
 
-  <button class="btn" onclick="gerarPDF()">Gerar Proposta em PDF</button>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Item</th>
+                        <th style="width: 8%;">Selecionar</th>
+                        <th style="width: 12%;">Quantidade</th>
+                        <th style="width: 15%;">Preço Unit.</th>
+                        <th style="width: 15%;">Instalação</th>
+                        <th style="width: 15%;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaItens">
+                    </tbody>
+            </table>
+        </div>
 
-  <script>
-    const { jsPDF } = window.jspdf;
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3>Total Equipamentos</h3>
+                <p id="totalEquipamentos">R$ 0,00</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Instalação</h3>
+                <p id="totalInstalacao">R$ 0,00</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Geral</h3>
+                <p id="totalGeral">R$ 0,00</p>
+            </div>
+        </div>
 
-    const precosBase = {
-      "Câmera IP Bullet Positivo": 300,
-      "Câmera IM5": 250,
-      "Central de alarme AMT 1000": 500,
-      "Sensor de presença": 80,
-      "Sensor de abertura": 60,
-      "Controle remoto": 40,
-      "Sirene piezoelétrica": 70,
-      "Cabo coaxial": 2,
-      "Fonte 12V 5A": 90,
-      "DVR 8 canais": 700,
-      "DVR 16 canais": 1200,
-      "HD 1TB": 200,
-      "HD 2TB": 350,
-      "HD 4TB": 600,
-      "Roteador Wi-Fi": 150,
-      "Switch 8 portas": 180,
-      "Switch 16 portas": 350,
-      "Nobreak 1kVA": 900,
-      "Nobreak 2kVA": 1500,
-      "Suporte de câmera": 25,
-      "Caixa de passagem": 30,
-      "Conector BNC": 5,
-      "Conector P4": 5,
-      "Patch cord": 15,
-      "Rack 8U": 400,
-      "Rack 16U": 700,
-      "Mão de obra instalação": 800
-    };
+        <div class="mensalidade-section">
+            <h3>Selecione o Tipo de Mensalidade:</h3>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="semTatico" name="mensalidade" value="390" checked onchange="calcularTotais()">
+                    <label for="semTatico">Sem Tático - R$ 390,00/mês</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="comTatico" name="mensalidade" value="490" onchange="calcularTotais()">
+                    <label for="comTatico">Com Tático - R$ 490,00/mês</label>
+                </div>
+            </div>
+        </div>
 
-    // Monta a tabela na página
-    const tbody = document.getElementById("lista-itens");
-    Object.entries(precosBase).forEach(([item, preco]) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${item}</td>
-        <td>R$ ${preco.toFixed(2).replace(".", ",")}</td>
-        <td><input type="number" min="0" value="0"></td>
-      `;
-      tbody.appendChild(tr);
-    });
+        <button class="export-btn" onclick="gerarPDF()">Gerar Proposta em PDF</button>
+    </div>
 
-    function gerarPDF() {
-      const tabela = parseFloat(document.getElementById("tabela").value);
-      const inputs = document.querySelectorAll("#lista-itens tr");
+    <script>
+        const { jsPDF } = window.jspdf;
 
-      let dados = [];
-      let totalGeral = 0;
+        const items = [
+            { name: 'Câmera IP Bullet Positivo', cost: 182.99, p30: 237.89, p50: 274.49, p100: 365.98, install: 110 },
+            { name: 'Câmera IM5', cost: 428.92, p30: 557.60, p50: 643.38, p100: 857.84, install: 110 },
+            { name: 'Central de Alarme AMT 1000 Smart', cost: 334.12, p30: 434.36, p50: 501.18, p100: 668.24, install: 150 },
+            { name: 'Sensor Interno IVP 1000 Sem Fio', cost: 82.80, p30: 107.64, p50: 124.20, p100: 165.60, install: 80 },
+            { name: 'Sensor Externo Sem Fio IVP 7000', cost: 365.40, p30: 475.02, p50: 548.10, p100: 730.80, install: 80 },
+            { name: 'Controle XAC 2003', cost: 19.90, p30: 25.87, p50: 29.85, p100: 39.80, install: 0 },
+            { name: 'Sirene', cost: 18.91, p30: 24.58, p50: 28.37, p100: 37.82, install: 0 },
+            { name: 'Bateria Central', cost: 66.51, p30: 86.46, p50: 99.77, p100: 133.02, install: 0 },
+            { name: 'Poste', cost: 1200.00, p30: 1560.00, p50: 1800.00, p100: 2400.00, install: 0 },
+            { name: 'Security Box', cost: 1500.00, p30: 1950.00, p50: 2250.00, p100: 3000.00, install: 150 },
+            { name: 'Grade Proteção para Câmeras', cost: 34.32, p30: 44.62, p50: 51.48, p100: 68.64, install: 0 },
+            { name: 'Fonte Chaveada 12V', cost: 32.00, p30: 41.60, p50: 48.00, p100: 64.00, install: 0 },
+            { name: 'Hub', cost: 45.90, p30: 59.67, p50: 68.85, p100: 91.80, install: 0 },
+            { name: 'Cabo Manga 6 Vias (metro)', cost: 6.00, p30: 7.80, p50: 9.00, p100: 12.00, install: 0 },
+            { name: 'Cabo Manga 4 Vias (metro)', cost: 4.00, p30: 5.20, p50: 6.00, p100: 8.00, install: 0 },
+            { name: 'Cabo de Energia (metro)', cost: 1.00, p30: 1.30, p50: 1.50, p100: 2.00, install: 0 },
+            { name: 'Cabo CFTV (metro)', cost: 0.83, p30: 1.08, p50: 1.25, p100: 1.66, install: 0 },
+            { name: 'Cabo de Rede (metro)', cost: 1.00, p30: 1.30, p50: 1.50, p100: 2.00, install: 0 },
+            { name: 'Régua de Energia', cost: 20.00, p30: 26.00, p50: 30.00, p100: 40.00, install: 0 },
+            { name: 'Caixa de Passagem/Emenda', cost: 16.00, p30: 20.80, p50: 24.00, p100: 32.00, install: 0 },
+            { name: 'Fita Isolante', cost: 3.50, p30: 4.55, p50: 5.25, p100: 7.00, install: 0 },
+            { name: 'Controle de Acesso Facial 3531', cost: 739.99, p30: 961.99, p50: 1109.99, p100: 1479.98, install: 0 },
+            { name: 'Controle de Acesso Facial 3532', cost: 849.90, p30: 1104.87, p50: 1274.85, p100: 1699.80, install: 0 },
+            { name: 'Controle de Acesso Facial 3532 MF W', cost: 1200.00, p30: 1560.00, p50: 1800.00, p100: 2400.00, install: 0 }
+        ];
 
-      inputs.forEach(row => {
-        const item = row.cells[0].innerText;
-        const precoBase = parseFloat(row.cells[1].innerText.replace("R$ ","").replace(",","."));
-        const qtd = parseInt(row.cells[2].querySelector("input").value) || 0;
-        if (qtd > 0) {
-          const precoUnit = precoBase * tabela;
-          const subtotal = precoUnit * qtd;
-          totalGeral += subtotal;
-          dados.push([item, qtd, 
-            "R$ " + precoUnit.toFixed(2).replace(".", ","), 
-            "R$ " + subtotal.toFixed(2).replace(".", ",")
-          ]);
+        const slide1_base64 = 'data:image/jpeg;base64,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';
+        const slide2_base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAJEAQMAAAAZm4fnAAAABlBMVEUAAAANDQ8E2N91AAAA/klEQVR42u3TQQkAMQwEwZ3/0N2sAYaCQS//o3eCCIqg7Gxw66c5SR3o6+4BAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgACBB17gD9t2ehj48KSfAAAAAElFTkSuQmCC';
+        const slide3_base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAJEAQMAAAAZm4fnAAAABlBMVEUAAAANDQ8E2N91AAAAzElEQVR42u3TQQkAMAwEwZ3/0N2sAYaCQS//o3eCCIqg7Gxw66c5SR3o6+4BAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgACBB4w/AAG5B6BoAAAAAElFTkSuQmCC';
+        const slide4_base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAJEAQMAAAAZm4fnAAAABlBMVEUAAAANDQ8E2N91AAAAxUlEQVR42u3TQQkAMAwEwZ3/0N2sAYaCQS//o3eCCIqg7Gxw66c5SR3o6+4BAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgACBBwM7AAGfJg0QAAAAAElFTkSuQmCC';
+        const slide5_base64 = 'data:image/jpeg;base64,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';
+
+        function formatCurrency(value) {
+            return `R$ ${value.toFixed(2).replace('.', ',')}`;
         }
-      });
 
-      const doc = new jsPDF();
+        function popularTabela() {
+            const tbody = document.getElementById('tabelaItens');
+            tbody.innerHTML = '';
+            items.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td style="text-align: center;"><input type="checkbox" data-index="${index}"></td>
+                    <td><input type="number" data-index="${index}" value="1" min="1"></td>
+                    <td class="preco-unit"></td>
+                    <td>${formatCurrency(item.install)}</td>
+                    <td class="total-item">R$ 0,00</td>
+                `;
+            });
+            // Adiciona os event listeners após criar os elementos
+            document.querySelectorAll('#tabelaItens input').forEach(input => {
+                input.addEventListener('change', calcularTotais);
+            });
+        }
 
-      // Logo (coloque o arquivo logo.png na mesma pasta do index.html)
-      // doc.addImage("logo.png", "PNG", 10, 10, 40, 20);
+        function atualizarPrecos() {
+            const tabelaSelecionada = document.getElementById('priceTable').value;
+            const precosUnit = document.querySelectorAll('.preco-unit');
+            items.forEach((item, index) => {
+                let preco;
+                if (tabelaSelecionada === 'cost') {
+                    preco = item.cost;
+                } else {
+                    preco = item['p' + tabelaSelecionada];
+                }
+                precosUnit[index].textContent = formatCurrency(preco);
+            });
+            calcularTotais();
+        }
 
-      doc.setFontSize(16);
-      doc.text("Proposta Comercial", 105, 20, { align: "center" });
+        function calcularTotais() {
+            const tabelaSelecionada = document.getElementById('priceTable').value;
+            let totalEquipamentos = 0;
+            let totalInstalacao = 0;
 
-      doc.setFontSize(10);
-      doc.text("Cliente: __________________________", 14, 30);
-      doc.text("Data: ____/____/________", 14, 36);
+            const linhas = document.querySelectorAll('#tabelaItens tr');
+            linhas.forEach((linha, index) => {
+                const item = items[index];
+                const checkbox = linha.querySelector('input[type="checkbox"]');
+                const quantidade = parseInt(linha.querySelector('input[type="number"]').value) || 0;
+                
+                let precoUnit;
+                if (tabelaSelecionada === 'cost') {
+                    precoUnit = item.cost;
+                } else {
+                    precoUnit = item['p' + tabelaSelecionada];
+                }
+                
+                let totalItem = 0;
+                if (checkbox.checked) {
+                    const equipTotal = precoUnit * quantidade;
+                    const installTotal = item.install * quantidade;
+                    totalItem = equipTotal + installTotal;
+                    
+                    totalEquipamentos += equipTotal;
+                    totalInstalacao += installTotal;
+                }
+                
+                linha.querySelector('.total-item').textContent = formatCurrency(totalItem);
+            });
 
-      // Tabela com itens
-      doc.autoTable({
-        head: [["Item", "Qtd", "Unitário", "Total"]],
-        body: dados,
-        startY: 50,
-        theme: "grid"
-      });
+            document.getElementById('totalEquipamentos').textContent = formatCurrency(totalEquipamentos);
+            document.getElementById('totalInstalacao').textContent = formatCurrency(totalInstalacao);
+            document.getElementById('totalGeral').textContent = formatCurrency(totalEquipamentos + totalInstalacao);
+        }
+        
+        function gerarPDF() {
+            const clientName = document.getElementById('clientName').value.trim();
+            if (!clientName) {
+                alert('Por favor, digite o nome do cliente antes de gerar a proposta.');
+                return;
+            }
 
-      // Total geral
-      let finalY = doc.lastAutoTable.finalY + 10;
-      doc.setFontSize(12);
-      doc.text("TOTAL GERAL: R$ " + totalGeral.toFixed(2).replace(".", ","), 150, finalY);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Rodapé
-      doc.setFontSize(9);
-      doc.text("Validade da proposta: 7 dias", 14, finalY + 20);
-      doc.text("Condições de pagamento: A combinar", 14, finalY + 26);
+            const tabelaSelecionada = document.getElementById('priceTable').value;
+            const selectedItemsData = [];
+            let totalEquip = 0;
+            let totalInstall = 0;
 
-      doc.save("Proposta.pdf");
-    }
-  </script>
+            items.forEach((item, index) => {
+                const checked = document.querySelector(`input[type="checkbox"][data-index="${index}"]`).checked;
+                if (checked) {
+                    const qty = parseInt(document.querySelector(`input[type="number"][data-index="${index}"]`).value) || 0;
+                    
+                    let price;
+                    if (tabelaSelecionada === 'cost') price = item.cost;
+                    else price = item['p' + tabelaSelecionada];
+                    
+                    const itemTotalEquip = price * qty;
+                    const itemTotalInstall = item.install * qty;
+                    
+                    selectedItemsData.push([item.name, formatCurrency(price), qty, formatCurrency(itemTotalEquip + itemTotalInstall)]);
+
+                    totalEquip += itemTotalEquip;
+                    totalInstall += itemTotalInstall;
+                }
+            });
+
+            if (selectedItemsData.length === 0) {
+              alert('Por favor, selecione ao menos um item para gerar a proposta.');
+              return;
+            }
+
+            const mensalidade = document.querySelector('input[name="mensalidade"]:checked').value;
+            const totalGeral = totalEquip + totalInstall;
+            const entrada = totalGeral / 3;
+
+            // --- PÁGINA 1: CAPA ---
+            doc.addImage(slide1_base64, 'JPEG', 0, 0, pageWidth, pageHeight);
+            doc.setFontSize(22);
+            doc.setTextColor('#FFFFFF');
+            doc.text(clientName, 30, 160);
+
+            // --- PÁGINA 2: NOSSA SOLUÇÃO ---
+            doc.addPage();
+            doc.addImage(slide2_base64, 'PNG', 0, 0, pageWidth, pageHeight);
+
+            // --- PÁGINA 3: ORÇAMENTO ---
+            doc.addPage();
+            doc.addImage(slide3_base64, 'PNG', 0, 0, pageWidth, pageHeight);
+            doc.autoTable({
+                body: selectedItemsData,
+                startY: 95,
+                theme: 'plain',
+                styles: {
+                    halign: 'center',
+                    textColor: '#FFFFFF',
+                    fontSize: 10,
+                },
+                margin: { left: 18, right: 18 },
+                didDrawPage: (data) => {
+                    doc.setFontSize(10);
+                    doc.setTextColor('#FFFFFF');
+                }
+            });
+
+            // --- PÁGINA 4: VALORES E INVESTIMENTO ---
+            doc.addPage();
+            doc.addImage(slide4_base64, 'PNG', 0, 0, pageWidth, pageHeight);
+            doc.setFontSize(26);
+            doc.setTextColor(53, 194, 255);
+            doc.text(formatCurrency(totalGeral), 42, 117);
+            doc.text(formatCurrency(parseFloat(mensalidade)), 42, 178);
+            doc.setFontSize(14);
+            doc.setTextColor('#FFFFFF');
+            doc.text(formatCurrency(entrada), 147, 122);
+            doc.text(formatCurrency(entrada), 142, 131);
+
+            // --- PÁGINA 5: CONTATO ---
+            doc.addPage();
+            doc.addImage(slide5_base64, 'JPEG', 0, 0, pageWidth, pageHeight);
+            
+            doc.save(`Proposta_VirtualFence_${clientName.replace(/\s/g, '_')}.pdf`);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            popularTabela();
+            atualizarPrecos();
+        });
+    </script>
 </body>
 </html>
-```
+
