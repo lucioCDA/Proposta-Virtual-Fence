@@ -1,172 +1,144 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-import os
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Proposta Comercial</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    input[type="number"] { width: 60px; }
+    .btn { background: #007bff; color: #fff; padding: 10px 15px; border: none; cursor: pointer; }
+    .btn:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>Proposta Comercial</h1>
 
-# Lista de itens (27 itens completos)
-itens = [
-    "Câmera IP Bullet Positivo", "Câmera IM5", "Central de alarme AMT 1000",
-    "Sensor de presença", "Sensor de abertura", "Controle remoto",
-    "Sirene piezoelétrica", "Cabo coaxial", "Fonte 12V 5A", "DVR 8 canais",
-    "DVR 16 canais", "HD 1TB", "HD 2TB", "HD 4TB", "Roteador Wi-Fi",
-    "Switch 8 portas", "Switch 16 portas", "Nobreak 1kVA", "Nobreak 2kVA",
-    "Suporte de câmera", "Caixa de passagem", "Conector BNC", "Conector P4",
-    "Patch cord", "Rack 8U", "Rack 16U", "Mão de obra instalação"
-]
+  <label>Tabela de preços:</label>
+  <select id="tabela">
+    <option value="0.3">30%</option>
+    <option value="0.5">50%</option>
+    <option value="1.0" selected>100%</option>
+  </select>
 
-# Preços base de cada item
-precos_base = {
-    "Câmera IP Bullet Positivo": 300,
-    "Câmera IM5": 250,
-    "Central de alarme AMT 1000": 500,
-    "Sensor de presença": 80,
-    "Sensor de abertura": 60,
-    "Controle remoto": 40,
-    "Sirene piezoelétrica": 70,
-    "Cabo coaxial": 2,
-    "Fonte 12V 5A": 90,
-    "DVR 8 canais": 700,
-    "DVR 16 canais": 1200,
-    "HD 1TB": 200,
-    "HD 2TB": 350,
-    "HD 4TB": 600,
-    "Roteador Wi-Fi": 150,
-    "Switch 8 portas": 180,
-    "Switch 16 portas": 350,
-    "Nobreak 1kVA": 900,
-    "Nobreak 2kVA": 1500,
-    "Suporte de câmera": 25,
-    "Caixa de passagem": 30,
-    "Conector BNC": 5,
-    "Conector P4": 5,
-    "Patch cord": 15,
-    "Rack 8U": 400,
-    "Rack 16U": 700,
-    "Mão de obra instalação": 800
-}
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Preço Base</th>
+        <th>Quantidade</th>
+      </tr>
+    </thead>
+    <tbody id="lista-itens"></tbody>
+  </table>
 
-# Função para calcular orçamento
-def calcular_orcamento():
-    try:
-        multiplicador = float(combo_tabela.get())
-    except:
-        messagebox.showerror("Erro", "Selecione uma tabela de preços válida!")
-        return
+  <button class="btn" onclick="gerarPDF()">Gerar Proposta em PDF</button>
 
-    total = 0
-    for i, item in enumerate(itens):
-        qtd = int(entry_qtd[i].get() or 0)
-        preco_unit = precos_base[item] * multiplicador
-        total += qtd * preco_unit
+  <script>
+    const { jsPDF } = window.jspdf;
 
-    lbl_total.config(text=f"Total: R$ {total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+    const precosBase = {
+      "Câmera IP Bullet Positivo": 300,
+      "Câmera IM5": 250,
+      "Central de alarme AMT 1000": 500,
+      "Sensor de presença": 80,
+      "Sensor de abertura": 60,
+      "Controle remoto": 40,
+      "Sirene piezoelétrica": 70,
+      "Cabo coaxial": 2,
+      "Fonte 12V 5A": 90,
+      "DVR 8 canais": 700,
+      "DVR 16 canais": 1200,
+      "HD 1TB": 200,
+      "HD 2TB": 350,
+      "HD 4TB": 600,
+      "Roteador Wi-Fi": 150,
+      "Switch 8 portas": 180,
+      "Switch 16 portas": 350,
+      "Nobreak 1kVA": 900,
+      "Nobreak 2kVA": 1500,
+      "Suporte de câmera": 25,
+      "Caixa de passagem": 30,
+      "Conector BNC": 5,
+      "Conector P4": 5,
+      "Patch cord": 15,
+      "Rack 8U": 400,
+      "Rack 16U": 700,
+      "Mão de obra instalação": 800
+    };
 
-# Função para gerar PDF
-def gerar_pdf():
-    try:
-        multiplicador = float(combo_tabela.get())
-    except:
-        messagebox.showerror("Erro", "Selecione uma tabela de preços válida!")
-        return
+    // Monta a tabela na página
+    const tbody = document.getElementById("lista-itens");
+    Object.entries(precosBase).forEach(([item, preco]) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item}</td>
+        <td>R$ ${preco.toFixed(2).replace(".", ",")}</td>
+        <td><input type="number" min="0" value="0"></td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-    # Caminho do PDF
-    nome_arquivo = "Proposta.pdf"
-    c = canvas.Canvas(nome_arquivo, pagesize=A4)
-    largura, altura = A4
+    function gerarPDF() {
+      const tabela = parseFloat(document.getElementById("tabela").value);
+      const inputs = document.querySelectorAll("#lista-itens tr");
 
-    # Cabeçalho
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(200, altura - 50, "Proposta Comercial")
+      let dados = [];
+      let totalGeral = 0;
 
-    c.setFont("Helvetica", 10)
-    c.drawString(50, altura - 80, "Cliente: __________________________")
-    c.drawString(50, altura - 100, "Data: ____/____/________")
+      inputs.forEach(row => {
+        const item = row.cells[0].innerText;
+        const precoBase = parseFloat(row.cells[1].innerText.replace("R$ ","").replace(",","."));
+        const qtd = parseInt(row.cells[2].querySelector("input").value) || 0;
+        if (qtd > 0) {
+          const precoUnit = precoBase * tabela;
+          const subtotal = precoUnit * qtd;
+          totalGeral += subtotal;
+          dados.push([item, qtd, 
+            "R$ " + precoUnit.toFixed(2).replace(".", ","), 
+            "R$ " + subtotal.toFixed(2).replace(".", ",")
+          ]);
+        }
+      });
 
-    # Tabela
-    y = altura - 140
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(50, y, "Item")
-    c.drawString(300, y, "Qtd")
-    c.drawString(350, y, "Unitário")
-    c.drawString(450, y, "Total")
-    c.line(50, y - 2, 550, y - 2)
+      const doc = new jsPDF();
 
-    total_geral = 0
-    c.setFont("Helvetica", 9)
-    for i, item in enumerate(itens):
-        qtd = int(entry_qtd[i].get() or 0)
-        if qtd > 0:
-            preco_unit = precos_base[item] * multiplicador
-            subtotal = qtd * preco_unit
-            total_geral += subtotal
+      // Logo (coloque o arquivo logo.png na mesma pasta do index.html)
+      // doc.addImage("logo.png", "PNG", 10, 10, 40, 20);
 
-            y -= 20
-            c.drawString(50, y, item)
-            c.drawString(300, y, str(qtd))
-            c.drawString(350, y, f"R$ {preco_unit:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-            c.drawString(450, y, f"R$ {subtotal:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+      doc.setFontSize(16);
+      doc.text("Proposta Comercial", 105, 20, { align: "center" });
 
-            # Quebra de página se passar do limite
-            if y < 100:
-                c.showPage()
-                y = altura - 50
-                c.setFont("Helvetica-Bold", 10)
-                c.drawString(50, y, "Item")
-                c.drawString(300, y, "Qtd")
-                c.drawString(350, y, "Unitário")
-                c.drawString(450, y, "Total")
-                c.line(50, y - 2, 550, y - 2)
-                c.setFont("Helvetica", 9)
+      doc.setFontSize(10);
+      doc.text("Cliente: __________________________", 14, 30);
+      doc.text("Data: ____/____/________", 14, 36);
 
-    # Total final
-    y -= 30
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(350, y, "TOTAL GERAL:")
-    c.drawString(450, y, f"R$ {total_geral:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+      // Tabela com itens
+      doc.autoTable({
+        head: [["Item", "Qtd", "Unitário", "Total"]],
+        body: dados,
+        startY: 50,
+        theme: "grid"
+      });
 
-    # Rodapé
-    y -= 50
-    c.setFont("Helvetica", 8)
-    c.drawString(50, y, "Validade da proposta: 7 dias")
-    c.drawString(50, y - 15, "Condições de pagamento: A combinar")
+      // Total geral
+      let finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(12);
+      doc.text("TOTAL GERAL: R$ " + totalGeral.toFixed(2).replace(".", ","), 150, finalY);
 
-    # Salvar
-    c.save()
-    messagebox.showinfo("Sucesso", f"Proposta gerada: {os.path.abspath(nome_arquivo)}")
+      // Rodapé
+      doc.setFontSize(9);
+      doc.text("Validade da proposta: 7 dias", 14, finalY + 20);
+      doc.text("Condições de pagamento: A combinar", 14, finalY + 26);
 
-# Interface gráfica
-root = tk.Tk()
-root.title("Orçamento - Proposta Comercial")
-
-frame = tk.Frame(root)
-frame.pack(padx=10, pady=10)
-
-# Seleção da tabela
-tk.Label(frame, text="Tabela de Preços:").grid(row=0, column=0, sticky="w")
-combo_tabela = ttk.Combobox(frame, values=["0.3", "0.5", "1.0"])
-combo_tabela.grid(row=0, column=1)
-combo_tabela.set("1.0")
-
-# Cabeçalho da tabela
-tk.Label(frame, text="Item").grid(row=1, column=0, padx=5, pady=5)
-tk.Label(frame, text="Quantidade").grid(row=1, column=1, padx=5, pady=5)
-
-entry_qtd = []
-for i, item in enumerate(itens):
-    tk.Label(frame, text=item).grid(row=i + 2, column=0, sticky="w")
-    e = tk.Entry(frame, width=5)
-    e.grid(row=i + 2, column=1)
-    entry_qtd.append(e)
-
-# Botões
-btn_calc = tk.Button(root, text="Calcular Orçamento", command=calcular_orcamento)
-btn_calc.pack(pady=5)
-
-lbl_total = tk.Label(root, text="Total: R$ 0,00", font=("Arial", 12, "bold"))
-lbl_total.pack(pady=5)
-
-btn_pdf = tk.Button(root, text="Gerar Proposta em PDF", command=gerar_pdf)
-btn_pdf.pack(pady=5)
-
-root.mainloop()
+      doc.save("Proposta.pdf");
+    }
+  </script>
+</body>
+</html>
+```
