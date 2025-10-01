@@ -58,13 +58,10 @@
         </div>
     </div>
 
-    <button class="export-btn" onclick="gerarPDF()">Gerar Proposta em PDF</button>
+    <button class="export-btn" onclick="gerarPropostaHTML()">Gerar Proposta em HTML</button>
 </div>
 
 <script>
-    // Desestruturação jsPDF do objeto global após carregar o script
-    const { jsPDF } = window.jspdf;
-
     const items = [
         { name: "Câmera IP Bullet Positivo", cost: 182.99, p30: 237.89, p50: 274.49, p100: 365.98, install: 110 },
         { name: "Câmera IM5", cost: 428.92, p30: 557.6, p50: 643.38, p100: 857.84, install: 110 },
@@ -91,9 +88,6 @@
         { name: "Controle de Acesso Facial 3532", cost: 849.9, p30: 1104.87, p50: 1274.85, p100: 1699.8, install: 0 },
         { name: "Controle de Acesso Facial 3532 MF W", cost: 1200, p30: 1560, p50: 1800, p100: 2400, install: 0 }
     ];
-
-    // Base64 images (slides)
-    const slide1_base64 = 'data:image/jpeg;base64,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';
 
     function formatCurrency(value) {
         return `R$ ${value.toFixed(2).replace('.', ',')}`;
@@ -179,107 +173,72 @@
         document.getElementById('totalGeral').textContent = formatCurrency(totalEquipamentos + totalInstalacao);
     }
 
-    function gerarPDF() {
+    function gerarPropostaHTML() {
         const clientName = document.getElementById('clientName').value.trim();
         if (!clientName) {
             alert('Por favor, digite o nome do cliente antes de gerar a proposta.');
             return;
         }
 
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-
         const tabelaSelecionada = document.getElementById('priceTable').value;
-        const selectedItemsData = [];
-        let totalEquip = 0;
-        let totalInstall = 0;
+        let html = `
+        <html>
+        <head>
+            <title>Proposta Virtual Fence - ${clientName}</title>
+            <style>
+                body { font-family: Arial, sans-serif; background: #fff; color: #000; padding: 20px; }
+                h1 { color: #00d4ff; }
+                table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+                th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+                th { background-color: #00d4ff; color: white; }
+                .total { font-weight: bold; font-size: 1.2em; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+        <h1>Proposta para: ${clientName}</h1>
+        <h2>Tabela: ${tabelaSelecionada === 'cost' ? 'Preço de Custo' : tabelaSelecionada + '% de Margem'}</h2>
+        <table>
+            <thead>
+                <tr><th>Item</th><th>Preço Unit.</th><th>Quantidade</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+        `;
+
+        let totalGeral = 0;
 
         items.forEach((item, index) => {
             const checkbox = document.querySelector(`input[type="checkbox"][data-index="${index}"]`);
             if (checkbox && checkbox.checked) {
                 const qtyInput = document.querySelector(`input[type="number"][data-index="${index}"]`);
                 const qty = qtyInput ? parseInt(qtyInput.value) || 0 : 0;
-
-                let price;
-                if (tabelaSelecionada === 'cost') price = item.cost;
-                else price = item['p' + tabelaSelecionada];
-
-                const itemTotalEquip = price * qty;
-                const itemTotalInstall = item.install * qty;
-
-                selectedItemsData.push([
-                    item.name,
-                    formatCurrency(price),
-                    qty,
-                    formatCurrency(itemTotalEquip + itemTotalInstall)
-                ]);
-
-                totalEquip += itemTotalEquip;
-                totalInstall += itemTotalInstall;
+                let price = tabelaSelecionada === 'cost' ? item.cost : item['p' + tabelaSelecionada];
+                let totalItem = (price * qty) + (item.install * qty);
+                totalGeral += totalItem;
+                html += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${formatCurrency(price)}</td>
+                    <td>${qty}</td>
+                    <td>${formatCurrency(totalItem)}</td>
+                </tr>
+                `;
             }
         });
 
-        if (selectedItemsData.length === 0) {
-            alert('Por favor, selecione ao menos um item para gerar a proposta.');
-            return;
-        }
+        html += `
+            </tbody>
+        </table>
+        <div class="total">Total Geral: ${formatCurrency(totalGeral)}</div>
+        </body>
+        </html>
+        `;
 
-        const mensalidade = document.querySelector('input[name="mensalidade"]:checked').value;
-        const totalGeral = totalEquip + totalInstall;
-        const entrada = totalGeral / 3;
-
-        // Página 1: Capa
-        doc.addImage(slide1_base64, 'JPEG', 0, 0, pageWidth, pageHeight);
-        doc.setFontSize(22);
-        doc.setTextColor(255, 255, 255);
-        doc.text(clientName, 30, 160);
-
-        // Página 2: Nossa Solução
-        doc.addPage();
-        doc.addImage(slide2_base64, 'PNG', 0, 0, pageWidth, pageHeight);
-
-        // Página 3: Orçamento com tabela
-        doc.addPage();
-        doc.addImage(slide3_base64, 'PNG', 0, 0, pageWidth, pageHeight);
-        doc.autoTable({
-            head: [['Item', 'Preço Unit.', 'Qtd', 'Total']],
-            body: selectedItemsData,
-            startY: 95,
-            theme: 'plain',
-            styles: {
-                halign: 'center',
-                textColor: '#FFFFFF',
-                fontSize: 10,
-            },
-            margin: { left: 18, right: 18 },
-            didDrawPage: () => {
-                doc.setFontSize(10);
-                doc.setTextColor('#FFFFFF');
-            },
-        });
-
-        // Página 4: Valores e Investimento
-        doc.addPage();
-        doc.addImage(slide4_base64, 'PNG', 0, 0, pageWidth, pageHeight);
-        doc.setFontSize(26);
-        doc.setTextColor(53, 194, 255);
-        doc.text(formatCurrency(totalGeral), 42, 117);
-        doc.text(formatCurrency(parseFloat(mensalidade)), 42, 178);
-        doc.setFontSize(14);
-        doc.setTextColor(255, 255, 255);
-        doc.text(formatCurrency(entrada), 147, 122);
-        doc.text(formatCurrency(entrada), 142, 131);
-
-        // Página 5: Contato
-        doc.addPage();
-        doc.addImage(slide5_base64, 'JPEG', 0, 0, pageWidth, pageHeight);
-
-        // Salvar PDF
-        doc.save(`Proposta_VirtualFence_${clientName.replace(/\s/g, '_')}.pdf`);
+        const newWindow = window.open();
+        newWindow.document.write(html);
+        newWindow.document.close();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
         popularTabela();
         atualizarPrecos();
     });
